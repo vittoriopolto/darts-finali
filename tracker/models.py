@@ -1,7 +1,7 @@
 from django.db import models
 
 # --- Regole del gioco (modificabili qui) ---------------------------------
-WIN_SCORE = 7   # vince chi arriva a 7
+WIN_SCORE = 3   # vince chi arriva a 7
 MAX_LIVE = 2    # partite giocate in contemporanea
 
 SINGLE = "S"
