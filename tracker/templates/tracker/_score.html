@@ -2,13 +2,13 @@
 <div class="stepper">
   <button type="button" class="step" aria-label="Meno un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="a" data-delta="-1">−</button>
   <span class="num{% if g.winner == 'a' %} win{% endif %}">{{ g.score_a }}</span>
-  <button type="button" class="step plus" aria-label="Più un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="a" data-delta="1">+</button>
+  <button type="button" class="step plus" aria-label="Più un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="a" data-delta="1"{% if g.match_point_a %} data-confirm="Punto decisivo: {{ g.names_a|join:" / " }} vince {{ win_score }} - {{ g.score_b }}. Confermi?"{% endif %}>+</button>
 </div>
 <span class="vs">vs</span>
 <div class="stepper">
   <button type="button" class="step" aria-label="Meno un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="b" data-delta="-1">−</button>
   <span class="num{% if g.winner == 'b' %} win{% endif %}">{{ g.score_b }}</span>
-  <button type="button" class="step plus" aria-label="Più un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="b" data-delta="1">+</button>
+  <button type="button" class="step plus" aria-label="Più un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="b" data-delta="1"{% if g.match_point_b %} data-confirm="Punto decisivo: {{ g.names_b|join:" / " }} vince {{ g.score_a }} - {{ win_score }}. Confermi?"{% endif %}>+</button>
 </div>
 {% else %}
 <span class="num{% if g.winner == 'a' %} win{% endif %}">{{ g.score_a }}</span>

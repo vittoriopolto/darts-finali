@@ -307,6 +307,13 @@
     ta.rows = Math.min(14, text.split("\n").length + 1);
     card.appendChild(ta);
 
+    if (!navigator.share) {
+      var note = document.createElement("p");
+      note.className = "muted";
+      note.textContent = "Il menu di condivisione del telefono non è disponibile su questo indirizzo (serve https). Usa WhatsApp, Email o Copia.";
+      card.appendChild(note);
+    }
+
     var actions = document.createElement("div");
     actions.className = "actions";
 
@@ -326,6 +333,21 @@
     copyBtn.className = "btn";
     copyBtn.textContent = "Copia";
     copyBtn.addEventListener("click", function () { copyText(text, copyBtn); });
+    // Questi link funzionano anche senza https e senza il menu di sistema
+    var wa = document.createElement("a");
+    wa.className = "btn";
+    wa.textContent = "WhatsApp";
+    wa.href = "https://wa.me/?text=" + encodeURIComponent(text);
+    wa.target = "_blank";
+    wa.rel = "noopener";
+    actions.appendChild(wa);
+
+    var mail = document.createElement("a");
+    mail.className = "btn";
+    mail.textContent = "Email";
+    mail.href = "mailto:?subject=" + encodeURIComponent("Foglio gara") + "&body=" + encodeURIComponent(text);
+    actions.appendChild(mail);
+
     actions.appendChild(copyBtn);
 
     var closeBtn = document.createElement("button");
@@ -398,6 +420,7 @@
       if (!btn) { return; }
       e.preventDefault();
       if (btn.disabled) { return; }
+      if (btn.dataset.confirm && !window.confirm(btn.dataset.confirm)) { return; }
       btn.disabled = true;
 
       var body = new URLSearchParams();

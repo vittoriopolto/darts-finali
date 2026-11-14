@@ -78,6 +78,16 @@ class Game(models.Model):
         return None
 
     @property
+    def match_point_a(self):
+        """Un altro punto di A chiude la partita."""
+        return not self.finished and self.score_a == WIN_SCORE - 1
+
+    @property
+    def match_point_b(self):
+        """Un altro punto di B chiude la partita."""
+        return not self.finished and self.score_b == WIN_SCORE - 1
+
+    @property
     def status(self):
         if self.finished:
             return "finished"
