@@ -259,6 +259,115 @@
   }
 
   // =====================================================================
+  //  Condividi testo: "NOME PUNTI - PUNTI NOME"
+  // =====================================================================
+  function joinNames(names) { return names.join(" / "); }
+
+  function lineFor(g) {
+    return joinNames(g.names_a) + " " + g.score_a + " - " + g.score_b + " " + joinNames(g.names_b);
+  }
+
+  function buildText(data) {
+    var lines = ["👑 " + data.team_a + " " + data.wins_a + " - " + data.wins_b + " " + data.team_b];
+    var finished = data.games.filter(function (g) { return g.status === "finished"; });
+    var live = data.games.filter(function (g) { return g.status === "live"; });
+
+    if (finished.length) {
+      lines.push("", "✅ Concluse");
+      finished.forEach(function (g) { lines.push(lineFor(g)); });
+    }
+    if (live.length) {
+      lines.push("", "🔴 In corso");
+      live.forEach(function (g) { lines.push(lineFor(g)); });
+    }
+    return lines.join("\n");
+  }
+
+  function copyText(text, btn) {
+    var ok = function () { var l = btn.textContent; btn.textContent = "Copiato ✓"; setTimeout(function () { btn.textContent = l; }, 1500); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(ok).catch(function () {});
+    } else {
+      var ta = document.querySelector("#share-overlay textarea");
+      if (ta) { ta.focus(); ta.select(); try { if (document.execCommand("copy")) { ok(); } } catch (e) {} }
+    }
+  }
+
+  function showTextPreview(text) {
+    closePreview();
+    var overlay = document.createElement("div");
+    overlay.id = "share-overlay";
+    overlay.className = "share-overlay";
+    var card = document.createElement("div");
+    card.className = "share-card";
+
+    var ta = document.createElement("textarea");
+    ta.readOnly = true;
+    ta.value = text;
+    ta.rows = Math.min(14, text.split("\n").length + 1);
+    card.appendChild(ta);
+
+    var actions = document.createElement("div");
+    actions.className = "actions";
+
+    if (navigator.share) {
+      var shareBtn = document.createElement("button");
+      shareBtn.type = "button";
+      shareBtn.className = "btn red";
+      shareBtn.textContent = "💬 Condividi";
+      shareBtn.addEventListener("click", function () {
+        navigator.share({ text: text, title: "Foglio gara" }).catch(function () {});
+      });
+      actions.appendChild(shareBtn);
+    }
+
+    var copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "btn";
+    copyBtn.textContent = "Copia";
+    copyBtn.addEventListener("click", function () { copyText(text, copyBtn); });
+    actions.appendChild(copyBtn);
+
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "btn ghost";
+    closeBtn.textContent = "Chiudi";
+    closeBtn.addEventListener("click", closePreview);
+    actions.appendChild(closeBtn);
+
+    card.appendChild(actions);
+    overlay.appendChild(card);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) { closePreview(); } });
+    document.body.appendChild(overlay);
+  }
+
+  function shareText(btn) {
+    if (btn.disabled) { return; }
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Preparo il testo…";
+    var done = function () { btn.disabled = false; btn.textContent = label; };
+
+    fetch(btn.dataset.shareTextUrl, { cache: "no-store", headers: { "X-Requested-With": "fetch" } })
+      .then(function (r) { if (!r.ok) { throw new Error("dati"); } return r.json(); })
+      .then(function (data) {
+        var text = buildText(data);
+        if (navigator.share) {
+          navigator.share({ text: text, title: "Foglio gara" })
+            .catch(function (err) {
+              if (err && err.name === "AbortError") { return; }
+              showTextPreview(text);   // iPhone: serve un secondo tocco
+            })
+            .then(done);
+        } else {
+          showTextPreview(text);       // PC: anteprima con tasto Copia
+          done();
+        }
+      })
+      .catch(function () { alert("Errore di rete: riprova."); done(); });
+  }
+
+  // =====================================================================
   //  Aggiornamento automatico della diretta + azioni admin
   // =====================================================================
   var box = document.getElementById("live");
@@ -282,6 +391,8 @@
     box.addEventListener("click", function (e) {
       var shareBtn = e.target.closest("[data-share-url]");
       if (shareBtn) { e.preventDefault(); shareSheet(shareBtn); return; }
+      var textBtn = e.target.closest("[data-share-text-url]");
+      if (textBtn) { e.preventDefault(); shareText(textBtn); return; }
 
       var btn = e.target.closest("[data-post-url]");
       if (!btn) { return; }

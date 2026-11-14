@@ -172,3 +172,8 @@ input:focus { outline: 2px solid var(--red); outline-offset: 0; }
 }
 .share-card img { display: block; width: 100%; height: auto; border-radius: 8px; }
 .share-card .actions { flex-wrap: wrap; }
+.share-card textarea {
+  display: block; width: 100%; resize: none; padding: .7rem;
+  background: #0d0d0d; color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+  font: inherit; font-size: 1rem; line-height: 1.5;
+}
