@@ -1,0 +1,13 @@
+{% extends "tracker/base.html" %}
+{% block title %}Storico · Finali{% endblock %}
+{% block content %}
+<h1>Storico gare</h1>
+{% for m in matches %}
+  <a class="card match-link" href="{% url 'match_sheet' m.pk %}">
+    <span class="when">{{ m.created_at|date:"d/m/Y H:i" }}</span>
+    <span class="vs-line">👑 {{ m.team_a }} <strong>{{ m.wins_a }} – {{ m.wins_b }}</strong> {{ m.team_b }}</span>
+  </a>
+{% empty %}
+  <div class="card empty"><p>Nessuna gara registrata.</p></div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{% if not match %}
+  <div class="card empty">
+    <h2>Nessuna gara</h2>
+    <p>Non c'è ancora nessuna gara in programma.</p>
+    {% if is_admin %}<a class="btn red" href="{% url 'match_create' %}">Crea la prima gara</a>{% endif %}
+  </div>
+{% else %}
+
+  <section class="scoreboard">
+    <div class="team team-a">👑 {{ match.team_a }}</div>
+    <div class="wins">
+      <span class="{% if winner == 'a' %}win{% endif %}">{{ wins_a }}</span>
+      <span class="sep">–</span>
+      <span class="{% if winner == 'b' %}win{% endif %}">{{ wins_b }}</span>
+    </div>
+    <div class="team team-b">{{ match.team_b }}</div>
+  </section>
+
+  {% if winner %}
+    <div class="banner">🏆 Incontro vinto da {% if winner == 'a' %}👑 {{ match.team_a }}{% else %}{{ match.team_b }}{% endif %}</div>
+  {% endif %}
+
+  <div class="toolbar">
+    {% if show_live %}
+      <a class="btn" href="{% url 'match_sheet' match.pk %}">Visualizza foglio gara</a>
+    {% elif force_sheet %}
+      <a class="btn" href="{% url 'home' %}">← Diretta</a>
+    {% endif %}
+    {% if is_admin %}
+      {% if can_start_next %}
+        <button type="button" class="btn red" data-post-url="{% url 'start_next' match.pk %}">▶ Avvia le prossime partite</button>
+      {% endif %}
+      <a class="btn ghost" href="{% url 'match_edit' match.pk %}">✎ Modifica giocatori</a>
+    {% endif %}
+  </div>
+
+  {% if show_live %}
+    <h2 class="section">Partite in corso</h2>
+    {% for g in live_games %}
+      <article class="game live">
+        <div class="game-head">
+          <span>Partita {{ g.order }} · {{ g.get_kind_display }}</span>
+          <span class="pill live">● In corso</span>
+        </div>
+        <div class="game-body">
+          <div class="side side-a">{% for n in g.names_a %}<div class="player">{{ n }}</div>{% endfor %}</div>
+          <div class="score">{% include "tracker/_score.html" %}</div>
+          <div class="side side-b">{% for n in g.names_b %}<div class="player">{{ n }}</div>{% endfor %}</div>
+        </div>
+        {% if is_admin %}
+          <div class="game-foot">
+            <button type="button" class="btn ghost small" data-post-url="{% url 'game_live' g.pk %}">⏸ Ferma</button>
+          </div>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    <h2 class="section">Foglio gara</h2>
+    {% for g in games %}
+      <article class="game row {{ g.status }}">
+        <div class="game-head">
+          <span>{{ g.order }} · {{ g.get_kind_display }}</span>
+          {% if g.status == 'live' %}<span class="pill live">● In corso</span>
+          {% elif g.status == 'finished' %}<span class="pill done">Conclusa</span>
+          {% elif g.status == 'paused' %}<span class="pill">Sospesa</span>
+          {% else %}<span class="pill">In attesa</span>{% endif %}
+        </div>
+        <div class="game-body">
+          <div class="side side-a{% if g.winner == 'a' %} won{% endif %}">{% for n in g.names_a %}<div class="player">{{ n }}</div>{% endfor %}</div>
+          <div class="score">{% include "tracker/_score.html" %}</div>
+          <div class="side side-b{% if g.winner == 'b' %} won{% endif %}">{% for n in g.names_b %}<div class="player">{{ n }}</div>{% endfor %}</div>
+        </div>
+        {% if is_admin and not g.finished %}
+          <div class="game-foot">
+            <button type="button" class="btn ghost small" data-post-url="{% url 'game_live' g.pk %}">{% if g.is_live %}⏸ Ferma{% else %}▶ Avvia{% endif %}</button>
+          </div>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% endif %}
+
+{% endif %}

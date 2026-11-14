@@ -1,0 +1,17 @@
+{% if is_admin %}
+<div class="stepper">
+  <button type="button" class="step" aria-label="Meno un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="a" data-delta="-1">−</button>
+  <span class="num{% if g.winner == 'a' %} win{% endif %}">{{ g.score_a }}</span>
+  <button type="button" class="step plus" aria-label="Più un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="a" data-delta="1">+</button>
+</div>
+<span class="vs">vs</span>
+<div class="stepper">
+  <button type="button" class="step" aria-label="Meno un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="b" data-delta="-1">−</button>
+  <span class="num{% if g.winner == 'b' %} win{% endif %}">{{ g.score_b }}</span>
+  <button type="button" class="step plus" aria-label="Più un punto" data-post-url="{% url 'game_point' g.pk %}" data-side="b" data-delta="1">+</button>
+</div>
+{% else %}
+<span class="num{% if g.winner == 'a' %} win{% endif %}">{{ g.score_a }}</span>
+<span class="vs">–</span>
+<span class="num{% if g.winner == 'b' %} win{% endif %}">{{ g.score_b }}</span>
+{% endif %}

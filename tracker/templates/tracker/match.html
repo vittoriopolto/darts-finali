@@ -1,0 +1,7 @@
+{% extends "tracker/base.html" %}
+{% block title %}Finali{% endblock %}
+{% block content %}
+<div id="live" data-url="{{ fragment_url }}">
+  {% include "tracker/_state.html" %}
+</div>
+{% endblock %}

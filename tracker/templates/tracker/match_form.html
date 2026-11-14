@@ -1,0 +1,53 @@
+{% extends "tracker/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+{% if match %}<p class="muted">I punteggi già inseriti non cambiano: qui modifichi solo squadre e nomi.</p>{% endif %}
+
+<form method="post" class="card form">
+  {% csrf_token %}
+  <datalist id="players-datalist" data-url="{% url 'player_search' %}"></datalist>
+
+  <div class="teams-input">
+    <label>👑 Squadra A (la nostra)
+      <input type="text" name="team_a" value="{{ team_a }}" maxlength="60" required>
+    </label>
+    <label>Squadra B
+      <input type="text" name="team_b" value="{{ team_b }}" maxlength="60" placeholder="Squadra B">
+    </label>
+  </div>
+
+  <h2 class="section">Giocatori per partita</h2>
+  <p class="muted">Scrivi almeno 3 lettere per vedere i nomi già usati. Puoi lasciare vuoto e completare dopo.</p>
+
+  {% for g in games %}
+    <fieldset class="game-input">
+      <legend>Partita {{ g.order }} · {{ g.get_kind_display }}</legend>
+      <div class="side-inputs">
+        <div>
+          <span class="label">👑 Squadra A</span>
+          <input class="player-input" list="players-datalist" name="g{{ g.order }}_a1" value="{{ g.a1 }}" placeholder="Giocatore" maxlength="60">
+          {% if g.kind == 'D' %}<input class="player-input" list="players-datalist" name="g{{ g.order }}_a2" value="{{ g.a2 }}" placeholder="Giocatore 2" maxlength="60">{% endif %}
+        </div>
+        <div>
+          <span class="label">Squadra B</span>
+          <input class="player-input" list="players-datalist" name="g{{ g.order }}_b1" value="{{ g.b1 }}" placeholder="Giocatore" maxlength="60">
+          {% if g.kind == 'D' %}<input class="player-input" list="players-datalist" name="g{{ g.order }}_b2" value="{{ g.b2 }}" placeholder="Giocatore 2" maxlength="60">{% endif %}
+        </div>
+      </div>
+    </fieldset>
+  {% endfor %}
+
+  <div class="actions">
+    <button type="submit" class="btn red">Salva</button>
+    <a class="btn ghost" href="{% url 'home' %}">Annulla</a>
+  </div>
+</form>
+
+{% if match %}
+  <form method="post" action="{% url 'match_delete' match.pk %}" onsubmit="return confirm('Eliminare definitivamente questa gara?');">
+    {% csrf_token %}
+    <button type="submit" class="btn danger">Elimina gara</button>
+  </form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "tracker/base.html" %}
+{% block title %}Accesso admin · Finali{% endblock %}
+{% block content %}
+<div class="card form narrow">
+  <h1>Accesso admin</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% if form.errors %}<div class="flash error">Utente o password non corretti.</div>{% endif %}
+    <label>Utente
+      <input type="text" name="username" autofocus autocomplete="username" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn red">Entra</button>
+  </form>
+</div>
+{% endblock %}
