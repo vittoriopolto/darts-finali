@@ -94,6 +94,35 @@ def match_fragment(request, pk):
     return render(request, "tracker/_state.html", build_state(request, match, True))
 
 
+@never_cache
+def match_data(request, pk):
+    """Dati del foglio gara in JSON: servono al tasto Condividi per disegnare l'immagine."""
+    match = get_object_or_404(Match, pk=pk)
+    state = build_state(request, match, True)
+    return JsonResponse(
+        {
+            "team_a": match.team_a,
+            "team_b": match.team_b,
+            "wins_a": state["wins_a"],
+            "wins_b": state["wins_b"],
+            "winner": state["winner"],
+            "games": [
+                {
+                    "order": g.order,
+                    "kind": g.get_kind_display(),
+                    "names_a": g.names_a,
+                    "names_b": g.names_b,
+                    "score_a": g.score_a,
+                    "score_b": g.score_b,
+                    "status": g.status,
+                    "winner": g.winner,
+                }
+                for g in state["games"]
+            ],
+        }
+    )
+
+
 def match_list(request):
     matches = Match.objects.prefetch_related("games")
     return render(request, "tracker/match_list.html", {"matches": matches})

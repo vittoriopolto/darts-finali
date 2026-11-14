@@ -9,6 +9,7 @@ urlpatterns = [
     path("frammento/", views.home_fragment, name="home_fragment"),
     path("gara/<int:pk>/", views.match_sheet, name="match_sheet"),
     path("gara/<int:pk>/frammento/", views.match_fragment, name="match_fragment"),
+    path("gara/<int:pk>/dati/", views.match_data, name="match_data"),
     path("gare/", views.match_list, name="match_list"),
     # Login
     path("login/", auth_views.LoginView.as_view(template_name="tracker/login.html"), name="login"),

@@ -21,6 +21,7 @@
   {% endif %}
 
   <div class="toolbar">
+    <button type="button" class="btn" data-share-url="{% url 'match_data' match.pk %}">📤 Condividi</button>
     {% if show_live %}
       <a class="btn" href="{% url 'match_sheet' match.pk %}">Visualizza foglio gara</a>
     {% elif force_sheet %}
