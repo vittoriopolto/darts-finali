@@ -158,6 +158,72 @@
     setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 5000);
   }
 
+  function closePreview() {
+    var old = document.getElementById("share-overlay");
+    if (old) {
+      var img = old.querySelector("img");
+      if (img) { URL.revokeObjectURL(img.src); }
+      old.remove();
+    }
+  }
+
+  // Anteprima con tasto Condividi: la condivisione parte da un tocco diretto,
+  // come richiesto da iPhone/Safari.
+  function showPreview(file, blob, note) {
+    closePreview();
+    var overlay = document.createElement("div");
+    overlay.id = "share-overlay";
+    overlay.className = "share-overlay";
+
+    var card = document.createElement("div");
+    card.className = "share-card";
+
+    var img = document.createElement("img");
+    img.alt = "Foglio gara";
+    img.src = URL.createObjectURL(blob);
+    card.appendChild(img);
+
+    if (note) {
+      var p = document.createElement("p");
+      p.className = "muted";
+      p.textContent = note;
+      card.appendChild(p);
+    }
+
+    var actions = document.createElement("div");
+    actions.className = "actions";
+
+    if (navigator.share) {
+      var shareBtn = document.createElement("button");
+      shareBtn.type = "button";
+      shareBtn.className = "btn red";
+      shareBtn.textContent = "📤 Condividi";
+      shareBtn.addEventListener("click", function () {
+        navigator.share({ files: [file], title: "Foglio gara" }).catch(function () {});
+      });
+      actions.appendChild(shareBtn);
+    }
+
+    var saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Salva";
+    saveBtn.addEventListener("click", function () { downloadBlob(blob); });
+    actions.appendChild(saveBtn);
+
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "btn ghost";
+    closeBtn.textContent = "Chiudi";
+    closeBtn.addEventListener("click", closePreview);
+    actions.appendChild(closeBtn);
+
+    card.appendChild(actions);
+    overlay.appendChild(card);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) { closePreview(); } });
+    document.body.appendChild(overlay);
+  }
+
   function shareSheet(btn) {
     if (btn.disabled) { return; }
     var label = btn.textContent;
@@ -177,9 +243,12 @@
             navigator.share({ files: [file], title: "Foglio gara" })
               .catch(function (err) {
                 if (err && err.name === "AbortError") { return; }   // chiuso dall'utente
-                downloadBlob(blob);                                  // altrimenti scarica
+                showPreview(file, blob, "");   // iPhone: serve un secondo tocco su Condividi
               })
               .then(done);
+          } else if (!window.isSecureContext) {
+            showPreview(file, blob, "La condivisione funziona solo con indirizzo https (il sito su Render), non con http://indirizzo-locale. Intanto puoi salvare l'immagine.");
+            done();
           } else {
             downloadBlob(blob);   // browser senza condivisione file (es. PC): scarica il PNG
             done();
